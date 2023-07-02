@@ -4,107 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bitcoin Transaction Explorer</title>
-    <link rel="icon" type="image/png" href="favicon.png"> <!-- Update with your favicon -->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background: #F9F9F9;
-            color: #333;
-        }
-        #txForm {
-            margin-bottom: 20px;
-        }
-        #txForm input[type="text"] {
-            padding: 10px;
-            width: 70%;
-            font-size: 1rem;
-            border-radius: 5px;
-            border: 1px solid #AAA;
-            box-sizing: border-box;
-        }
-        #txForm input[type="submit"] {
-            padding: 10px 20px;
-            font-size: 1rem;
-            border-radius: 5px;
-            border: none;
-            background: #007BFF;
-            color: #FFF;
-            margin-left: 10px;
-            cursor: pointer;
-        }
-        #txForm input[type="submit"]:hover {
-            background: #0056b3;
-        }
-        pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            background-color: #FFF;
-            border: 1px solid #DDD;
-            padding: 10px;
-            border-radius: 5px;
-            display: none; /* Hide by default */
-            overflow: auto;
-            max-height: 500px;
-            margin-top: 20px;
-        }
-        pre.show {
-            display: block; /* Show when data is available */
-        }
-        h2 {
-            margin-top: 30px;
-        }
-    </style>
-    <script>
-    window.onload = function() {
-        document.getElementById('txForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            // Reset the display
-            var txDataElem = document.getElementById('txData');
-            txDataElem.textContent = '';
-            txDataElem.classList.remove('show');
-
-            var rawTxDataElem = document.getElementById('rawTxData');
-            rawTxDataElem.textContent = '';
-            rawTxDataElem.classList.remove('show');
-
-            var txHash = document.getElementById('txHash').value;
-            
-            fetch(`https://blockchain.info/rawtx/${txHash}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("HTTP error " + response.status);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    txDataElem.textContent = JSON.stringify(data, null, 2);
-                    txDataElem.classList.add('show');
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Failed to fetch transaction data. Please check the transaction hash.');
-                });
-            
-            fetch(`https://blockchain.info/rawtx/${txHash}?format=hex`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("HTTP error " + response.status);
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    rawTxDataElem.textContent = data;
-                    rawTxDataElem.classList.add('show');
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Failed to fetch raw transaction data. Please check the transaction hash.');
-                });
-        });
-    }
-    </script>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/main.js" defer></script>
 </head>
 <body>
     <header>
@@ -115,10 +17,10 @@
             <input type="text" id="txHash" placeholder="Enter a transaction hash">
             <input type="submit" value="Fetch transaction data">
         </form>
-        <h2>Transaction Data</h2>
-        <pre id="txData"></pre>
         <h2>Raw Transaction Data (Hex Format)</h2>
         <pre id="rawTxData"></pre>
+        <h2>Transaction Data</h2>
+        <pre id="txData"></pre>
     </main>
 </body>
 </html>
