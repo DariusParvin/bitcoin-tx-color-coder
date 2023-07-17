@@ -1,48 +1,89 @@
+:root {
+    --main-bg-color: #333;
+    --main-color: #F9F9F9;
+    --secondary-bg-color: #555;
+    --secondary-color: #FFF;
+    --border-color: #777;
+    --placeholder-color: #999;
+    --submit-bg-color: #00CCFF;
+    --submit-hover-bg-color: #0099CC;
+}
+
 body {
     font-family: Arial, sans-serif;
     padding: 20px;
-    background: #F9F9F9;
-    color: #333;
+    background: var(--main-bg-color);
+    color: var(--main-color);
 }
+
 #txForm {
     margin-bottom: 20px;
 }
-#txForm input[type="text"] {
+
+#txForm input[type="text"],
+#txForm input[type="submit"] {
     padding: 10px;
-    width: 70%;
     font-size: 1rem;
     border-radius: 5px;
-    border: 1px solid #AAA;
     box-sizing: border-box;
+    color: var(--secondary-color);
 }
+
+#txForm input[type="text"] {
+    width: 70%;
+    border: 1px solid var(--secondary-bg-color);
+    background: var(--secondary-bg-color);
+}
+
+#txForm input[type="text"]::placeholder {
+    color: var(--placeholder-color);
+}
+
 #txForm input[type="submit"] {
     padding: 10px 20px;
-    font-size: 1rem;
-    border-radius: 5px;
     border: none;
-    background: #007BFF;
-    color: #FFF;
+    background: var(--submit-bg-color);
     margin-left: 10px;
     cursor: pointer;
 }
+
 #txForm input[type="submit"]:hover {
-    background: #0056b3;
+    background: var(--submit-hover-bg-color);
 }
+
 pre {
     white-space: pre-wrap;
     word-wrap: break-word;
-    background-color: #FFF;
-    border: 1px solid #DDD;
+    background-color: var(--secondary-bg-color);
+    border: 1px solid var(--border-color);
     padding: 10px;
     border-radius: 5px;
     display: none;
     overflow: auto;
     max-height: 500px;
     margin-top: 20px;
+    color: var(--secondary-color);
 }
+
 pre.show {
     display: block;
 }
+
 h2 {
     margin-top: 30px;
+}
+
+#colored-text {
+    font-family: "Courier New", Courier, monospace;
+    padding: 20px;
+    background-color: var(--secondary-color);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    color: var(--main-color);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow: auto;
+    max-height: 500px;
+    margin-top: 20px;
+    font-weight: bold;
 }

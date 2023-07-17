@@ -6,21 +6,24 @@
     <title>Bitcoin Transaction Explorer</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="stylesheet" href="css/styles.css">
-    <script src="js/main.js" defer></script>
+    <script type="module" src="dist/main.js" defer></script>
 </head>
 <body>
     <header>
-        <h1>Bitcoin Transaction Explorer</h1>
+        <h1>Bitcoin Tx Color Coder</h1>
     </header>
     <main>
         <form id="txForm">
-            <input type="text" id="txHash" placeholder="Enter a transaction hash">
+            <input type="text" id="txInput" placeholder="Enter a transaction hash">
             <input type="submit" value="Fetch transaction data">
         </form>
+        <body>f7821c5cdce384cf9c986fbf730d2eb02907b3ad2f3a2306b1ed40299bc217f2</body>
+        <body>44887de856949bbb690a7e664d7d5fad7c4a099a6e5d24059771660712d5c39b</body>
+        <body>ccf5d5c27f5ec51dc7142b5a7233ac829e432b461e61426792b400215fdd9626</body>
         <h2>Raw Transaction Data (Hex Format)</h2>
         <pre id="rawTxData"></pre>
-        <h2>Transaction Data</h2>
-        <pre id="txData"></pre>
+        <div id="colored-text"></div> 
+        <ul id="tx-breakdown"></ul>
     </main>
 </body>
 </html>

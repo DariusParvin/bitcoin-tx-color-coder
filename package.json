@@ -4,8 +4,20 @@
   "description": "An educational bitcoin explorer for developers",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack serve --open",
+    "build": "webpack"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "webpack": "^5.88.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  },
+  "dependencies": {
+    "bitcoinjs-lib": "^6.1.3",
+    "buffer": "^6.0.3",
+    "varuint-bitcoin": "^1.1.2"
+  }
 }
