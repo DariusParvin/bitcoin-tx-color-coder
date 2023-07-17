@@ -16,12 +16,12 @@ body {
     color: var(--main-color);
 }
 
-#txForm {
+.transaction-form {
     margin-bottom: 20px;
 }
 
-#txForm input[type="text"],
-#txForm input[type="submit"] {
+.transaction-form input[type="text"],
+.transaction-form input[type="submit"] {
     padding: 10px;
     font-size: 1rem;
     border-radius: 5px;
@@ -29,17 +29,17 @@ body {
     color: var(--secondary-color);
 }
 
-#txForm input[type="text"] {
+.transaction-form input[type="text"] {
     width: 70%;
     border: 1px solid var(--secondary-bg-color);
     background: var(--secondary-bg-color);
 }
 
-#txForm input[type="text"]::placeholder {
+.transaction-form input[type="text"]::placeholder {
     color: var(--placeholder-color);
 }
 
-#txForm input[type="submit"] {
+.transaction-form input[type="submit"] {
     padding: 10px 20px;
     border: none;
     background: var(--submit-bg-color);
@@ -47,7 +47,7 @@ body {
     cursor: pointer;
 }
 
-#txForm input[type="submit"]:hover {
+.transaction-form input[type="submit"]:hover {
     background: var(--submit-hover-bg-color);
 }
 
@@ -87,3 +87,14 @@ h2 {
     margin-top: 20px;
     font-weight: bold;
 }
+
+.link-button {
+    background: none;
+    border: none;
+    color: lightblue;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 1em;
+    font-family: Arial, sans-serif;
+  }
+
