@@ -3,19 +3,36 @@ import { getColor } from "./colorText.js";
 import { exampleTransactions } from "./exampleTransactions.js";
 
 window.onload = function () {
-
-  Object.keys(exampleTransactions).forEach(function (id) {
-    document.getElementById(id).addEventListener("click", function (e) {
-      e.preventDefault();
-
-      var txHexInput = document.getElementById("txHexInput");
-      txHexInput.value = exampleTransactions[id];
-      txHexInput.form.dispatchEvent(new Event('submit', {cancelable: true}));
-    });
-  });
-
   document
-    .getElementById("txidForm")
+    .getElementById("optionsForm")
+    .addEventListener("change", function (event) {
+      // hide all forms
+      document.getElementById("option1Form").classList.add("hidden");
+      document.getElementById("option2Form").classList.add("hidden");
+      document.getElementById("option3Form").classList.add("hidden");
+
+      // show selected form
+      document
+        .getElementById(event.target.value + "Form")
+        .classList.remove("hidden");
+    });
+
+    let option1Form = document.getElementById("option1Form");
+    // dynamically generate the buttons
+    exampleTransactions.forEach(function (transaction) {
+      let button = document.createElement("button");
+      button.classList.add("link-button");
+      button.textContent = transaction.type;
+      button.dataset.transactionType = transaction.type;
+      button.addEventListener("click", function (e) {
+        e.preventDefault();
+        processTransaction(transaction.value);
+      });
+      option1Form.appendChild(button);
+    });
+    
+  document
+    .getElementById("option2Form")
     .addEventListener("submit", async function (e) {
       e.preventDefault();
       // resetDisplay();
@@ -35,7 +52,7 @@ window.onload = function () {
     });
 
   document
-    .getElementById("txHexForm")
+    .getElementById("option3Form")
     .addEventListener("submit", async function (e) {
       e.preventDefault();
       // resetDisplay();
@@ -69,7 +86,6 @@ async function fetchData(url) {
 function processTransaction(transactionHex) {
   let tx = MyTransaction.fromHex(transactionHex);
   let tuples = tx.toTuples();
-  console.log(tuples);
 
   // Get the HTML element where we will append our colored text.
   // In this case, the element has an id of "colored-text".
