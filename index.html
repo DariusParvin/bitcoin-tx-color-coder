@@ -13,44 +13,49 @@
       <h1>Bitcoin Tx Color Coder</h1>
     </header>
     <main>
-        <form id="optionsForm">
-            <input type="radio" id="option1" name="option" value="option1">
-            <label for="option1">Choose from a list of example transactions</label><br>
-            <input type="radio" id="option2" name="option" value="option2">
-            <label for="option2">Enter a transaction hash (mainnet)</label><br>
-            <input type="radio" id="option3" name="option" value="option3">
-            <label for="option3">Enter a raw transaction (hex)</label><br>
-        </form>
+      <form id="optionsForm">
+        <input type="radio" id="option1" name="option" value="option1" />
+        <label for="option1">Choose from a list of example transactions</label
+        ><br />
+        <input type="radio" id="option2" name="option" value="option2" />
+        <label for="option2">Enter a transaction hash (mainnet)</label><br />
+        <input type="radio" id="option3" name="option" value="option3" />
+        <label for="option3">Enter a raw transaction (hex)</label><br />
+      </form>
 
-        <!-- Option 1 -->
-        <div id="option1Form" class="hidden"></div>
+      <br />
 
-        <!-- Option 2 -->
-        <form id="option2Form" class="transaction-form hidden">
-            <input
-            type="text"
-            id="txidInput"
-            placeholder="Enter a transaction hash"
-            />
-            <input type="submit" value="Fetch and parse transaction" />
-        </form>
+      <!-- Option 1 -->
+      <div id="option1Form" class="hidden">
+        <b>Example transactions:</b>
+      </div>
 
-        <!-- Option 3 -->
-        <form id="option3Form" class="transaction-form hidden">
-            <input
-            type="text"
-            id="txHexInput"
-            placeholder="Enter a raw transaction (hex)"
-            />
-            <input type="submit" value="Parse transaction" />
-        </form>
+      <!-- Option 2 -->
+      <form id="option2Form" class="transaction-form hidden">
+        <input
+          type="text"
+          id="txidInput"
+          placeholder="Enter a transaction hash"
+        />
+        <input type="submit" value="Fetch and parse transaction" />
+      </form>
 
-        <h3>Raw Transaction Data (Hex Format)</h3>
-        <pre id="rawTxData"></pre>
-        <h3>Color coded hex</h3>
-        <div id="colored-text"></div>
-        <h3>Legend</h3>
-        <ul id="tx-breakdown"></ul>
+      <!-- Option 3 -->
+      <form id="option3Form" class="transaction-form hidden">
+        <input
+          type="text"
+          id="txHexInput"
+          placeholder="Enter a raw transaction (hex)"
+        />
+        <input type="submit" value="Parse transaction" />
+      </form>
+
+      <!-- <h4>Raw Transaction Data (Hex Format)</h4> -->
+      <pre id="rawTxData"></pre>
+      <!-- <h4>Color coded hex</h4> -->
+      <div id="colored-text"></div>
+      <!-- <h4>Legend</h4> -->
+      <ul id="tx-breakdown"></ul>
     </main>
   </body>
 </html>

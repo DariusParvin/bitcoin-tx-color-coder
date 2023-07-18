@@ -17,25 +17,24 @@ window.onload = function () {
         .classList.remove("hidden");
     });
 
-    let option1Form = document.getElementById("option1Form");
-    // dynamically generate the buttons
-    exampleTransactions.forEach(function (transaction) {
-      let button = document.createElement("button");
-      button.classList.add("link-button");
-      button.textContent = transaction.type;
-      button.dataset.transactionType = transaction.type;
-      button.addEventListener("click", function (e) {
-        e.preventDefault();
-        processTransaction(transaction.value);
-      });
-      option1Form.appendChild(button);
+  let option1Form = document.getElementById("option1Form");
+  // dynamically generate the buttons
+  exampleTransactions.forEach(function (transaction) {
+    let button = document.createElement("button");
+    button.classList.add("link-button");
+    button.textContent = transaction.type;
+    button.dataset.transactionType = transaction.type;
+    button.addEventListener("click", function (e) {
+      e.preventDefault();
+      processTransaction(transaction.value);
     });
-    
+    option1Form.appendChild(button);
+  });
+
   document
     .getElementById("option2Form")
     .addEventListener("submit", async function (e) {
       e.preventDefault();
-      // resetDisplay();
 
       var txInput = document.getElementById("txidInput").value;
       if (txInput === "") {
@@ -55,20 +54,15 @@ window.onload = function () {
     .getElementById("option3Form")
     .addEventListener("submit", async function (e) {
       e.preventDefault();
-      // resetDisplay();
 
       const transactionHex = document.getElementById("txHexInput").value;
       processTransaction(transactionHex);
     });
-};
 
-function resetDisplay() {
-  ["colored-text", "tx-breakdown"].forEach((id) => {
-    var elem = document.getElementById(id);
-    elem.textContent = "";
-    elem.classList.remove("show");
-  });
-}
+  // select the first option by default
+  document.getElementById("option1").checked = true;
+  option1Form.classList.remove("hidden");
+};
 
 async function fetchData(url) {
   try {
