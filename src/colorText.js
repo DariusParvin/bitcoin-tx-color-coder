@@ -1,4 +1,4 @@
-export function getColor(item, txInCount, txOutCount) {
+export function getColor(item) {
   var hue = 0; // default hue (red)
   var lightness = 40; // default lightness
   var str = item[1]; // the code label e.g. "version", "txIn[0]hash", "txOut[0]script", etc.

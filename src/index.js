@@ -6,6 +6,9 @@ window.onload = function () {
   document
     .getElementById("optionsForm")
     .addEventListener("change", function (event) {
+      // clear the previous transaction
+      resetElements()
+
       // hide all forms
       document.getElementById("option1Form").classList.add("hidden");
       document.getElementById("option2Form").classList.add("hidden");
@@ -86,7 +89,7 @@ function processTransaction(transactionHex) {
   let tuples = tx.toTuples();
 
   var coloredSpans = tuples.map(function (item) {
-    var color = getColor(item, tx.ins.length, tx.outs.length);
+    var color = getColor(item);
     return '<span style="color: ' + color + '">' + item[0] + "</span>" + "|";
   });
 
@@ -96,7 +99,7 @@ function processTransaction(transactionHex) {
 
   var txBreakdownElement = document.getElementById("tx-breakdown");
   var coloredListItems = tuples.map(function (item) {
-    var color = getColor(item, txIn, txOut);
+    var color = getColor(item);
     return (
       '<li><span style="color: ' +
       color +
@@ -109,4 +112,10 @@ function processTransaction(transactionHex) {
   });
   txBreakdownElement.innerHTML = coloredListItems.join("");
   txBreakdownElement.classList.remove("hidden");
+}
+
+function resetElements() {
+  document.getElementById("txHexContainer").classList.add("hidden");
+  document.getElementById("coloredTextContainer").classList.add("hidden");
+  document.getElementById("tx-breakdown").classList.add("hidden");
 }
