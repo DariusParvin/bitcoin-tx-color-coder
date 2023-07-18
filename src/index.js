@@ -78,36 +78,25 @@ async function fetchData(url) {
 }
 
 function processTransaction(transactionHex) {
-
   const rawTx = document.getElementById("rawTxData");
   rawTx.textContent = transactionHex;
-  document.getElementById("txHexContainer").style.display = "block";
+  document.getElementById("txHexContainer").classList.remove("hidden");
 
   let tx = MyTransaction.fromHex(transactionHex);
   let tuples = tx.toTuples();
 
-  // Get the HTML element where we will append our colored text.
-  // In this case, the element has an id of "coloredText".
-  var coloredTextElement = document.getElementById("coloredText");
-
-  const txIn = tx.ins.length;
-  const txOut = tx.outs.length;
-
   var coloredSpans = tuples.map(function (item) {
-    var color = getColor(item, txIn, txOut);
+    var color = getColor(item, tx.ins.length, tx.outs.length);
     return '<span style="color: ' + color + '">' + item[0] + "</span>" + "|";
   });
 
-  // The Array join function is used to combine all elements of an array into a single string.
-  // We then set the innerHTML of our target element to this string,
-  // effectively replacing whatever was in the target element with our colored text.
+  var coloredTextElement = document.getElementById("coloredText");
   coloredTextElement.innerHTML = coloredSpans.join("");
-  document.getElementById("coloredTextContainer").style.display = "block";
+  document.getElementById("coloredTextContainer").classList.remove("hidden");
 
   var txBreakdownElement = document.getElementById("tx-breakdown");
   var coloredListItems = tuples.map(function (item) {
-    var color = getColor(item, txIn, txOut); // Hash the string to get a color
-    // Return a string of HTML that is a list item element with the first part as a colored span and the second part as a plain span.
+    var color = getColor(item, txIn, txOut);
     return (
       '<li><span style="color: ' +
       color +
@@ -119,6 +108,5 @@ function processTransaction(transactionHex) {
     );
   });
   txBreakdownElement.innerHTML = coloredListItems.join("");
-  txBreakdownElement.display = "block";
-
+  txBreakdownElement.classList.remove("hidden");
 }
