@@ -78,12 +78,17 @@ async function fetchData(url) {
 }
 
 function processTransaction(transactionHex) {
+
+  const rawTx = document.getElementById("rawTxData");
+  rawTx.textContent = transactionHex;
+  document.getElementById("txHexContainer").style.display = "block";
+
   let tx = MyTransaction.fromHex(transactionHex);
   let tuples = tx.toTuples();
 
   // Get the HTML element where we will append our colored text.
-  // In this case, the element has an id of "colored-text".
-  var targetElement = document.getElementById("colored-text");
+  // In this case, the element has an id of "coloredText".
+  var coloredTextElement = document.getElementById("coloredText");
 
   const txIn = tx.ins.length;
   const txOut = tx.outs.length;
@@ -96,7 +101,8 @@ function processTransaction(transactionHex) {
   // The Array join function is used to combine all elements of an array into a single string.
   // We then set the innerHTML of our target element to this string,
   // effectively replacing whatever was in the target element with our colored text.
-  targetElement.innerHTML = coloredSpans.join("");
+  coloredTextElement.innerHTML = coloredSpans.join("");
+  document.getElementById("coloredTextContainer").style.display = "block";
 
   var txBreakdownElement = document.getElementById("tx-breakdown");
   var coloredListItems = tuples.map(function (item) {
@@ -113,8 +119,6 @@ function processTransaction(transactionHex) {
     );
   });
   txBreakdownElement.innerHTML = coloredListItems.join("");
+  txBreakdownElement.display = "block";
 
-  const elem = document.getElementById("rawTxData");
-  elem.textContent = transactionHex;
-  elem.classList.add("show");
 }

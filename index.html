@@ -51,9 +51,14 @@
       </form>
 
       <!-- <h4>Raw Transaction Data (Hex Format)</h4> -->
-      <pre id="rawTxData"></pre>
+      <div id="txHexContainer" class="hidden">
+        <p>Raw Transaction Data (Hex Format)</p>
+        <pre id="rawTxData"></pre>
+      </div>
       <!-- <h4>Color coded hex</h4> -->
-      <div id="colored-text"></div>
+      <div id="coloredTextContainer" class="hidden">
+        <p>Color coded hex</p>
+        <pre id="coloredText"></pre>
       <!-- <h4>Legend</h4> -->
       <ul id="tx-breakdown"></ul>
     </main>

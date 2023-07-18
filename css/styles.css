@@ -58,28 +58,23 @@ pre {
   border: 1px solid var(--border-color);
   padding: 10px;
   border-radius: 5px;
-  display: none;
   overflow: auto;
   max-height: 500px;
   margin-top: 20px;
   color: var(--secondary-color);
 }
 
-pre.show {
-  display: block;
-}
-
 h2 {
   margin-top: 30px;
 }
 
-#colored-text {
+#coloredText {
   font-family: "Courier New", Courier, monospace;
+  color: black;
   padding: 20px;
   background-color: var(--secondary-color);
   border: 1px solid var(--border-color);
   border-radius: 5px;
-  color: var(--main-color);
   white-space: pre-wrap;
   word-wrap: break-word;
   overflow: auto;
