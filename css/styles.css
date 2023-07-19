@@ -70,9 +70,9 @@ h2 {
 
 #coloredText {
   font-family: "Courier New", Courier, monospace;
-  color: black;
+  color: gray;
   padding: 20px;
-  background-color: var(--secondary-color);
+  background-color: var(--secondary-bg-color);
   border: 1px solid var(--border-color);
   border-radius: 5px;
   white-space: pre-wrap;
@@ -96,3 +96,7 @@ h2 {
 .hidden {
   display: none;
 }
+
+.highlight {
+    background-color: gray;
+  }

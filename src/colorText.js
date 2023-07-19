@@ -1,49 +1,48 @@
 export function getColor(item) {
   var hue = 0; // default hue (red)
-  var lightness = 40; // default lightness
+  var lightness = 60; // default lightness
   var str = item[1]; // the code label e.g. "version", "txIn[0]hash", "txOut[0]script", etc.
 
   if (str === "version") {
     hue = 30;
-    lightness = 30;
+    lightness -= 10;
   }
 
-  if (str === "marker" || str === "flag") {
+  if (str === "marker" || str === "flag" || str.startsWith("witness")) {
     hue = 200;
+    lightness += 10;
   }
 
   if (str.startsWith("txIn")) {
-    hue = 70; // green
+    // txIn hash
+    hue = 120; 
     if (str.endsWith("index")) {
-      hue += 50; 
+      hue -= 50; 
     }
     if (str.endsWith("script")) {
-      hue += 70; 
+      hue += 50; 
     }
     if (str.endsWith("sequence")) {
-      hue = 280; 
+      hue = 310; 
     }
   }
 
   if (str.startsWith("txOut")) {
-    hue = 50;
+    hue = 30;
+    lightness += 10;
     if (str.endsWith("script")) {
-      hue += 10;
+      hue += 20;
     }
-  }
-
-  if (str.startsWith("witness")) {
-    hue = 200;
   }
 
   if (str === "locktime") {
     hue = 260;
-    lightness = 50;
+    lightness += 10;
   }
 
   if (str.endsWith("VarInt")) {
     hue = 340;
   }
 
-  return `hsl(${hue % 360}, 100%, ${lightness}%);`;
+  return `hsl(${hue}, 100%, ${lightness}%);`;
 }

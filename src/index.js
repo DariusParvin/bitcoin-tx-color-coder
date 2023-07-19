@@ -88,9 +88,10 @@ function processTransaction(transactionHex) {
   let tx = MyTransaction.fromHex(transactionHex);
   let tuples = tx.toTuples();
 
-  var coloredSpans = tuples.map(function (item) {
+  var coloredSpans = tuples.map(function (item, index) {
     var color = getColor(item);
-    return '<span style="color: ' + color + '">' + item[0] + "</span>" + "|";
+    // Note the use of `data-section-id` and the click event listener.
+    return '<span style="color: ' + color + '" data-section-id="' + index + '" class="transaction-section">' + item[0] + "</span>" + "|";
   });
 
   var coloredTextElement = document.getElementById("coloredText");
@@ -98,21 +99,57 @@ function processTransaction(transactionHex) {
   document.getElementById("coloredTextContainer").classList.remove("hidden");
 
   var txBreakdownElement = document.getElementById("tx-breakdown");
-  var coloredListItems = tuples.map(function (item) {
+  var coloredListItems = tuples.map(function (item, index) {
     var color = getColor(item);
     return (
       '<li><span style="color: ' +
       color +
-      '">' +
+      '" class="transaction-section legend-item" data-section-id="' + index + '">' +
       item[0] +
       "</span>: <span>" +
       item[1] +
       "</span></li>"
     );
   });
+  
   txBreakdownElement.innerHTML = coloredListItems.join("");
   txBreakdownElement.classList.remove("hidden");
 }
+
+document.addEventListener('click', function(event) {
+  // If a transaction section was clicked...
+  if (event.target.matches('.transaction-section')) {
+     // Un-highlight all elements.
+     document.querySelectorAll('.highlight').forEach(element => {
+      element.classList.remove('highlight');
+    });
+    
+    // Get the section id.
+    let sectionId = event.target.dataset.sectionId;
+
+    // Find all elements with this section id.
+    let elements = document.querySelectorAll(`[data-section-id="${sectionId}"]`);
+
+    // For each element...
+    elements.forEach(element => {
+      // ...toggle the highlight class.
+      element.classList.toggle('highlight');
+    });
+  }
+});
+
+document.body.addEventListener("click", function (e) {
+  // If the clicked target is not part of your color coded text or legend list
+  if (!e.target.matches('.highlight')) {
+    // Get all currently highlighted elements
+    let highlightedElements = document.querySelectorAll('.highlight');
+
+    // Remove highlighting class from each highlighted element
+    highlightedElements.forEach(function(el) {
+      el.classList.remove('highlight');
+    });
+  }
+});
 
 function resetElements() {
   document.getElementById("txHexContainer").classList.add("hidden");
