@@ -39,17 +39,16 @@ window.onload = function () {
     .addEventListener("submit", async function (e) {
       e.preventDefault();
 
-      var txInput = document.getElementById("txidInput").value;
-      if (txInput === "") {
+      var txidInput = document.getElementById("txidInput").value;
+      if (txidInput === "") {
         alert("Please enter a transaction ID.");
         return;
-      } else if (txInput.length !== 64) {
+      } else if (txidInput.length !== 64) {
         alert("transaction ID is not 32 bytes (64 hex characters)");
         return;
       }
-
-      var url = `https://blockchain.info/rawtx/${txInput}?format=hex`;
-      const transactionHex = await fetchData(url);
+      
+      const transactionHex = await fetchData(txidInput);
       processTransaction(transactionHex);
     });
 
@@ -67,18 +66,26 @@ window.onload = function () {
   option1Form.classList.remove("hidden");
 };
 
-async function fetchData(url) {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error ${response.status}. Please check the input.`);
+async function fetchData(txInput) {
+  const mainnetUrl = `https://blockstream.info/api/tx/${txInput}/hex`;
+  const testnetUrl = `https://blockstream.info/testnet/api/tx/${txInput}/hex`;
+
+  const requests = [fetch(mainnetUrl), fetch(testnetUrl)];
+  
+  const responses = await Promise.allSettled(requests);
+
+  for (let response of responses) {
+    if (response.status === "fulfilled") {
+      if (response.value.ok) {
+        return await response.value.text();
+      }
     }
-    return await response.text();
-  } catch (error) {
-    console.error("Error:", error);
-    alert(`Failed to fetch data. ${error.message}`);
   }
+
+  throw new Error('Transaction not found in both mainnet and testnet.');
 }
+
+
 
 function processTransaction(transactionHex) {
   const rawTx = document.getElementById("rawTxData");
@@ -86,8 +93,8 @@ function processTransaction(transactionHex) {
   document.getElementById("txHexContainer").classList.remove("hidden");
 
   let tx = MyTransaction.fromHex(transactionHex);
-  let tuples = tx.toTuples();
-
+  let tuples = tx.toAnnotatedTuples();
+  console.log(tuples);
   var coloredSpans = tuples.map(function (item, index) {
     var color = getColor(item);
     // Note the use of `data-section-id` and the click event listener.
@@ -101,16 +108,24 @@ function processTransaction(transactionHex) {
   var txBreakdownElement = document.getElementById("tx-breakdown");
   var coloredListItems = tuples.map(function (item, index) {
     var color = getColor(item);
+    var data = item[0];
+    var label = item[1];
+    var decoded = item[2];
+    var description = item[3];
+  
     return (
-      '<li><span style="color: ' +
-      color +
-      '" class="transaction-section legend-item" data-section-id="' + index + '">' +
-      item[0] +
-      "</span>: <span>" +
-      item[1] +
-      "</span></li>"
+      '<li><span style="color: ' + color + '" class="transaction-section legend-item styledTextPart" data-section-id="' + index + '">' +
+      data +
+      '</span>: <span>' +
+      label +
+      '</span><div class="description">' +
+      'decoded: ' + decoded + '<br>' +
+      description +
+      '</div></li>'
     );
   });
+  
+
   
   txBreakdownElement.innerHTML = coloredListItems.join("");
   txBreakdownElement.classList.remove("hidden");

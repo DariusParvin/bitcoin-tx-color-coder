@@ -11,6 +11,7 @@
   <body>
     <header>
       <h1>Bitcoin Tx Color Coder</h1>
+      <p>Learn all about how bitcoin transactions work under the hood!</p>
     </header>
     <main>
       <form id="optionsForm">
@@ -18,7 +19,7 @@
         <label for="option1">Choose from a list of example transactions</label
         ><br />
         <input type="radio" id="option2" name="option" value="option2" />
-        <label for="option2">Enter a transaction hash (mainnet)</label><br />
+        <label for="option2">Enter a transaction id (mainnet or testnet)</label><br />
         <input type="radio" id="option3" name="option" value="option3" />
         <label for="option3">Enter a raw transaction (hex)</label><br />
       </form>
@@ -50,16 +51,13 @@
         <input type="submit" value="Parse transaction" />
       </form>
 
-      <!-- <h4>Raw Transaction Data (Hex Format)</h4> -->
       <div id="txHexContainer" class="hidden">
-        <p>Raw Transaction Data (Hex Format)</p>
+        <p>Original Raw Transaction (Hex Format)</p>
         <pre id="rawTxData"></pre>
       </div>
-      <!-- <h4>Color coded hex</h4> -->
       <div id="coloredTextContainer" class="hidden">
         <p>Color coded hex</p>
         <pre id="coloredText"></pre>
-      <!-- <h4>Legend</h4> -->
       <ul id="tx-breakdown"></ul>
     </main>
   </body>
