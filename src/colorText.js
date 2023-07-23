@@ -42,6 +42,7 @@ export function getColor(item) {
 
   if (str.endsWith("VarInt")) {
     hue = 340;
+    lightness = 60;
   }
 
   return `hsl(${hue}, 100%, ${lightness}%);`;

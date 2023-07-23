@@ -1,9 +1,9 @@
 :root {
-  --main-bg-color: #333;
+  --main-bg-color: #292929;
   --main-color: #f9f9f9;
-  --secondary-bg-color: #555;
+  --secondary-bg-color: #353535;
   --secondary-color: #fff;
-  --border-color: #777;
+  --border-color: #555;
   --placeholder-color: #999;
   --submit-bg-color: #00ccff;
   --submit-hover-bg-color: #0099cc;
@@ -98,5 +98,21 @@ h2 {
 }
 
 .highlight {
-    background-color: gray;
+  background-color: gray;
+}
+
+.styledTextPart {
+  font-family: "Courier New", Courier, monospace;
+  color: gray;
+  font-weight: bold;
+}
+
+#tx-breakdown {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.description {
+    margin-left: 20px;
+    margin-bottom: 10px;
   }
