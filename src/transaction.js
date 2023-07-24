@@ -18,7 +18,7 @@ class MyTransaction extends bitcoinjs.Transaction {
 
   toAnnotatedTuples() {
     const tuples = this.toTuples();
-    const annotatedTuples = tuples.map(tuple => {
+    const annotatedTuples = tuples.map((tuple) => {
       const description = this.generateDescription(tuple);
       return [...tuple, ...description]; // Create a new tuple with the added description
     });
@@ -30,17 +30,25 @@ class MyTransaction extends bitcoinjs.Transaction {
     this.appendTuple(tuples, this.version, "version", 4);
 
     if (this.hasWitnesses()) {
-      this.appendTuple(tuples, MyTransaction.ADVANCED_TRANSACTION_MARKER, "marker");
+      this.appendTuple(
+        tuples,
+        MyTransaction.ADVANCED_TRANSACTION_MARKER,
+        "marker"
+      );
       this.appendTuple(tuples, MyTransaction.ADVANCED_TRANSACTION_FLAG, "flag");
     }
 
     this.appendVarIntTuple(tuples, this.ins.length, "txInVarInt");
     this.ins.forEach((txIn, i) => this.processTxIn(tuples, txIn, `txIn[${i}]`));
     this.appendVarIntTuple(tuples, this.outs.length, "txOutVarInt");
-    this.outs.forEach((txOut, i) => this.processTxOut(tuples, txOut, `txOut[${i}]`));
-    
+    this.outs.forEach((txOut, i) =>
+      this.processTxOut(tuples, txOut, `txOut[${i}]`)
+    );
+
     if (this.hasWitnesses()) {
-      this.ins.forEach((input, i) => this.processWitness(tuples, input.witness, `witness[${i}]`));
+      this.ins.forEach((input, i) =>
+        this.processWitness(tuples, input.witness, `witness[${i}]`)
+      );
     }
 
     this.appendTuple(tuples, this.locktime, "locktime", 4);
@@ -83,14 +91,16 @@ class MyTransaction extends bitcoinjs.Transaction {
 
   processWitness(tuples, witness, label) {
     this.appendVarIntTuple(tuples, witness.length, `${label}VarInt`);
-    witness.forEach((buf, i) => this.appendVarSlice(tuples, buf, `${label}[${i}]`));
+    witness.forEach((buf, i) =>
+      this.appendVarSlice(tuples, buf, `${label}[${i}]`)
+    );
   }
 
   generateDescription(tuple) {
     let description;
     let decoded;
-  
-    switch(tuple[1]) {
+
+    switch (tuple[1]) {
       case "version":
         decoded = this.version;
         description = `This is a 4-byte little-endian integer, representing the transaction version`;
@@ -159,7 +169,7 @@ class MyTransaction extends bitcoinjs.Transaction {
         var match = tuple[1].match(/^txOut\[(\d+)\]script$/);
         var index = parseInt(match[1]);
         var script = this.outs[index].script;
-        console.log(script);  
+        console.log(script);
         console.log(typeof script);
         decoded = bitcoinjs.script.toASM(script);
         description = `This is the locking script (scriptPubKey), specifying the conditions under which the output can be spent.`;
@@ -181,11 +191,17 @@ class MyTransaction extends bitcoinjs.Transaction {
         var match = tuple[1].match(/^witness\[(\d+)\]\[(\d+)\]script$/);
         var index = parseInt(match[1]);
         var witnessIndex = parseInt(match[2]);
-        var oldBuffer = this.ins[index].witness[witnessIndex];
-        console.log(oldBuffer);
-        console.log(typeof oldBuffer);
-        var newBuffer = Buffer.from(oldBuffer);
-        // decoded = bitcoinjs.script.toASM(newBuffer);
+
+        var script = this.ins[index].witness[witnessIndex];
+        var scriptHex = script.toString("hex");
+        if (scriptHex !== "") {
+          let scriptWithPushdata = bitcoinjs.script.fromASM(scriptHex);
+          decoded = bitcoinjs.script.toASM(scriptWithPushdata);
+          console.log("Decoded script: " + decoded);
+        } else {
+          decoded = "";
+        }
+
         description = `This is the witness item. For segwit transactions, the witness item is the unlocking script (scriptSig).`;
         break;
       case "locktime":
@@ -196,26 +212,23 @@ class MyTransaction extends bitcoinjs.Transaction {
         description = "No description available";
     }
 
-
     return [decoded, description];
   }
 
-   convertEndian(hexStr) {
+  convertEndian(hexStr) {
     // Validate input
     if (hexStr.length % 2 !== 0) {
-        throw new Error('Invalid hexadecimal string, length must be even.');
+      throw new Error("Invalid hexadecimal string, length must be even.");
     }
-    
+
     // Reverse the byte order
-    let result = '';
+    let result = "";
     for (let i = hexStr.length - 2; i >= 0; i -= 2) {
-        result += hexStr.substr(i, 2);
+      result += hexStr.substr(i, 2);
     }
-    
+
     return result;
+  }
 }
-
-}
-
 
 export default MyTransaction;
