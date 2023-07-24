@@ -116,11 +116,11 @@ function processTransaction(transactionHex) {
     return (
       '<li><span style="color: ' + color + '" class="transaction-section legend-item styledTextPart" data-section-id="' + index + '">' +
       data +
-      '</span>: <span>' +
-      label +
+      '</span>: <span>' + '<br>' +
       '</span><div class="description">' +
-      'decoded: ' + decoded + '<br>' +
-      description +
+      '<strong>Name: </strong>: ' + label + '<br>' +
+      '<strong>Decoded Value: </strong> ' + decoded + '<br>' +
+      '<strong>Description: </strong>' + description + 
       '</div></li>'
     );
   });
