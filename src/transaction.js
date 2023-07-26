@@ -122,7 +122,7 @@ class MyTransaction extends bitcoinjs.Transaction {
         var index = parseInt(match[1]);
         var big = this.ins[index].hash;
         decoded = this.convertEndian(big.toString("hex"));
-        description = `This is the hash of the transaction input at index ${index}, which is a 32-byte hash that references a previous transaction. Note that the transaction hash here is in big-endian format, whereas in other places it is typically represented in little-endian format.`;
+        description = `This is the hash of the transaction input at index ${index}. Note that the transaction hash here is in big-endian format, whereas in other places it is typically represented in little-endian format.`;
         break;
       case /^txIn\[\d\]index$/.test(tuple[1]) && tuple[1]:
         var match = tuple[1].match(/^txIn\[(\d+)\]index$/);
@@ -172,7 +172,12 @@ class MyTransaction extends bitcoinjs.Transaction {
         console.log(script);
         console.log(typeof script);
         decoded = bitcoinjs.script.toASM(script);
-        description = `This is the locking script (scriptPubKey), specifying the conditions under which the output can be spent.`;
+        try {
+        const address = bitcoinjs.address.fromOutputScript(script);
+        description = `This is the locking script (scriptPubKey), specifying the conditions under which the output can be spent. The scriptPubkey can be encoded as the following address: ${address}`;
+        } catch (error) {
+          description = `NO ADDRESS FOUND`;
+        }
         break;
       case /^witness\[\d\]VarInt$/.test(tuple[1]) && tuple[1]:
         var match = tuple[1].match(/^witness\[(\d+)\]VarInt$/);
@@ -197,12 +202,17 @@ class MyTransaction extends bitcoinjs.Transaction {
         if (scriptHex !== "") {
           let scriptWithPushdata = bitcoinjs.script.fromASM(scriptHex);
           decoded = bitcoinjs.script.toASM(scriptWithPushdata);
-          console.log("Decoded script: " + decoded);
+          try {
+            const worksifscript = Buffer.from(decoded, "hex");
+            decoded = bitcoinjs.script.toASM(worksifscript);
+            description = `This is the redeem script for the transaction input.`;
+          } catch (error) {
+            description = `This is the witness item. For segwit transactions, the witness item is the unlocking script (scriptSig).`;
+          }
         } else {
           decoded = "";
         }
 
-        description = `This is the witness item. For segwit transactions, the witness item is the unlocking script (scriptSig).`;
         break;
       case "locktime":
         decoded = this.locktime;
