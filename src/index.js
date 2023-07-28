@@ -93,11 +93,9 @@ function processTransaction(transactionHex) {
   document.getElementById("txHexContainer").classList.remove("hidden");
 
   let tx = MyTransaction.fromHex(transactionHex);
-  let tuples = tx.toAnnotatedTuples();
-  console.log(tuples);
-  var coloredSpans = tuples.map(function (item, index) {
+  let annotatedData = tx.toAnnotatedData();
+  var coloredSpans = annotatedData.map(function (item, index) {
     var color = getColor(item);
-    // Note the use of `data-section-id` and the click event listener.
     return '<span style="color: ' + color + '" data-section-id="' + index + '" class="transaction-section">' + item[0] + "</span>" + "|";
   });
 
@@ -106,7 +104,7 @@ function processTransaction(transactionHex) {
   document.getElementById("coloredTextContainer").classList.remove("hidden");
 
   var txBreakdownElement = document.getElementById("tx-breakdown");
-  var coloredListItems = tuples.map(function (item, index) {
+  var coloredListItems = annotatedData.map(function (item, index) {
     var color = getColor(item);
     var data = item[0];
     var label = item[1];
@@ -124,8 +122,6 @@ function processTransaction(transactionHex) {
       '</div></li>'
     );
   });
-  
-
   
   txBreakdownElement.innerHTML = coloredListItems.join("");
   txBreakdownElement.classList.remove("hidden");

@@ -1,5 +1,6 @@
-let bitcoinjs = require("bitcoinjs-lib");
-const varuint = require("varuint-bitcoin");
+const bitcoinjs = require("bitcoinjs-lib");
+import { TransactionDescriptions as txDescriptions } from "./txFieldDescriptions.js";
+import * as convert from './conversionHelpers.js';
 
 class MyTransaction extends bitcoinjs.Transaction {
   constructor() {
@@ -7,238 +8,227 @@ class MyTransaction extends bitcoinjs.Transaction {
   }
 
   static fromHex(hex) {
-    let tx = super.fromHex(hex);
-    let myTx = new MyTransaction();
-
-    for (let prop in tx) {
-      myTx[prop] = tx[prop];
-    }
-    return myTx;
+    const tx = super.fromHex(hex);
+    Object.setPrototypeOf(tx, MyTransaction.prototype);
+    return tx;
   }
 
-  toAnnotatedTuples() {
-    const tuples = this.toTuples();
-    const annotatedTuples = tuples.map((tuple) => {
-      const description = this.generateDescription(tuple);
-      return [...tuple, ...description]; // Create a new tuple with the added description
-    });
-    return annotatedTuples;
-  }
-
-  toTuples() {
-    const tuples = [];
-    this.appendTuple(tuples, this.version, "version", 4);
-
+  toAnnotatedData() {
+    // witness transactions have a marker and flag
     if (this.hasWitnesses()) {
-      this.appendTuple(
-        tuples,
-        MyTransaction.ADVANCED_TRANSACTION_MARKER,
-        "marker"
-      );
-      this.appendTuple(tuples, MyTransaction.ADVANCED_TRANSACTION_FLAG, "flag");
+      return [
+        ...this.getVersion(),
+        ...this.getMarker(),
+        ...this.getFlag(),
+        ...this.getInputs(),
+        ...this.getOutputs(),
+        ...this.getWitnesses(),
+        ...this.getLocktime(),
+      ];
     }
-
-    this.appendVarIntTuple(tuples, this.ins.length, "txInVarInt");
-    this.ins.forEach((txIn, i) => this.processTxIn(tuples, txIn, `txIn[${i}]`));
-    this.appendVarIntTuple(tuples, this.outs.length, "txOutVarInt");
-    this.outs.forEach((txOut, i) =>
-      this.processTxOut(tuples, txOut, `txOut[${i}]`)
-    );
-
-    if (this.hasWitnesses()) {
-      this.ins.forEach((input, i) =>
-        this.processWitness(tuples, input.witness, `witness[${i}]`)
-      );
-    }
-
-    this.appendTuple(tuples, this.locktime, "locktime", 4);
-    return tuples;
+    // legacy transactions do not have a marker or flag
+    return [
+      ...this.getVersion(),
+      ...this.getInputs(),
+      ...this.getOutputs(),
+      ...this.getLocktime(),
+    ];
   }
 
-  appendTuple(tuples, value, label, size = 1) {
-    const buffer = Buffer.alloc(size);
-    if (size === 1) {
-      buffer.writeUInt8(value);
-    } else if (size === 4) {
-      buffer.writeUInt32LE(value);
-    } else if (size === 8) {
-      buffer.writeBigUInt64LE(BigInt(value));
-    }
-    tuples.push([buffer.toString("hex"), label]);
+  getVersion() {
+    const value = this.version;
+    const hex = convert.toUInt32LE(value);
+    return [[hex, "version", value, txDescriptions.version]];
   }
 
-  appendVarIntTuple(tuples, value, label) {
-    const varInt = varuint.encode(value);
-    tuples.push([varInt.toString("hex"), label]);
+  getMarker() {
+    const value = MyTransaction.ADVANCED_TRANSACTION_MARKER;
+    const hex = convert.toUInt8(value);
+    return [[hex, "marker", value, txDescriptions.marker]];
   }
 
-  appendVarSlice(tuples, script, label) {
-    this.appendVarIntTuple(tuples, script.length, `${label}scriptVarInt`);
-    tuples.push([script.toString("hex"), `${label}script`]);
+  getFlag() {
+    const value = MyTransaction.ADVANCED_TRANSACTION_FLAG;
+    const hex = convert.toUInt8(value);
+    return [[hex, "flag", value, txDescriptions.flag]];
   }
 
-  processTxIn(tuples, txIn, label) {
-    tuples.push([txIn.hash.toString("hex"), `${label}hash`]);
-    this.appendTuple(tuples, txIn.index, `${label}index`, 4);
-    this.appendVarSlice(tuples, txIn.script, label);
-    this.appendTuple(tuples, txIn.sequence, `${label}sequence`, 4);
+  getInputs() {
+    const inputTuples = this.ins.map((_, i) => [
+      ...this.getInputHash(i),
+      ...this.getInputIndex(i),
+      ...this.getInputScriptVarInt(i),
+      ...this.getInputScript(i),
+      ...this.getInputSequence(i),
+    ]);
+
+    return [...this.getInputCount(), ...inputTuples.flat()];
   }
 
-  processTxOut(tuples, txOut, label) {
-    this.appendTuple(tuples, txOut.value, `${label}value`, 8);
-    this.appendVarSlice(tuples, txOut.script, label);
+  getInputCount() {
+    const value = this.ins.length;
+    const hex = convert.toVarInt(value);
+    return [[hex, "txInVarInt", value, txDescriptions.txInVarInt]];
   }
 
-  processWitness(tuples, witness, label) {
-    this.appendVarIntTuple(tuples, witness.length, `${label}VarInt`);
-    witness.forEach((buf, i) =>
-      this.appendVarSlice(tuples, buf, `${label}[${i}]`)
-    );
+  getInputHash(index) {
+    const bigEndianHash = this.ins[index].hash;
+    const hex = bigEndianHash.toString("hex");
+    const converted = convert.Endian(bigEndianHash.toString("hex"));
+    const label = `txIn[${index}]hash`;
+    return [[hex, label, converted, txDescriptions.txInHash]];
   }
 
-  generateDescription(tuple) {
-    let description;
+  getInputIndex(index) {
+    const value = this.ins[index].index;
+    const hex = convert.toUInt32LE(value);
+    const label = `txIn[${index}]index`;
+    return [[hex, label, value, txDescriptions.txInIndex]];
+  }
+
+  getInputScriptVarInt(index) {
+    const value = this.ins[index].script.length;
+    const hex = convert.toVarInt(value);
+    const label = `txIn[${index}]scriptVarInt`;
+    return [[hex, label, value, txDescriptions.txInScriptVarInt]];
+  }
+
+  getInputScript(index) {
+    const value = this.ins[index].script;
+    const hex = value.toString("hex");
     let decoded;
-
-    switch (tuple[1]) {
-      case "version":
-        decoded = this.version;
-        description = `This is a 4-byte little-endian integer, representing the transaction version`;
-        break;
-      case "marker":
-        decoded = MyTransaction.ADVANCED_TRANSACTION_MARKER;
-        description = `This is a one-byte marker (required to be '00') that serves as an indicator that the given transaction incorporates Segregated Witness (segwit) data.`;
-        break;
-      case "flag":
-        decoded = MyTransaction.ADVANCED_TRANSACTION_FLAG;
-        description = `A flag byte that follows the marker byte in transactions with witness data. It must be '01' to indicate that witness data follows.`;
-        break;
-      case "txInVarInt":
-        decoded = this.ins.length;
-        description = `This is a variable integer (VarInt) that denotes the number of transaction inputs.`;
-        break;
-      case /^txIn\[(\d+)\]hash$/.test(tuple[1]) && tuple[1]:
-        var match = tuple[1].match(/^txIn\[(\d+)\]hash$/);
-        var index = parseInt(match[1]);
-        var big = this.ins[index].hash;
-        decoded = this.convertEndian(big.toString("hex"));
-        description = `This is the hash of the transaction input at index ${index}. Note that the transaction hash here is in big-endian format, whereas in other places it is typically represented in little-endian format.`;
-        break;
-      case /^txIn\[\d\]index$/.test(tuple[1]) && tuple[1]:
-        var match = tuple[1].match(/^txIn\[(\d+)\]index$/);
-        var index = parseInt(match[1]);
-        decoded = this.ins[index].index;
-        description = `This is a 4-byte little-endian integer which represents the index of the specific output in the previous transaction.`;
-        break;
-      case /^txIn\[\d\]scriptVarInt$/.test(tuple[1]) && tuple[1]:
-        var match = tuple[1].match(/^txIn\[(\d+)\]scriptVarInt$/);
-        var index = parseInt(match[1]);
-        decoded = this.ins[index].script.length;
-        description = `This is a variable integer (VarInt) that denotes the length of the subsequent unlocking script.`;
-        break;
-      case /^txIn\[\d\]script$/.test(tuple[1]) && tuple[1]:
-        var match = tuple[1].match(/^txIn\[(\d+)\]script$/);
-        var index = parseInt(match[1]);
-        var script = this.ins[index].script;
-        decoded = bitcoinjs.script.toASM(script);
-        description = `This is the unlocking script (scriptSig), providing proof of ownership of the bitcoins being spent.`;
-        break;
-      case /^txIn\[\d\]sequence$/.test(tuple[1]) && tuple[1]:
-        var match = tuple[1].match(/^txIn\[(\d+)\]sequence$/);
-        var index = parseInt(match[1]);
-        decoded = this.ins[index].sequence;
-        description = `This is a 4-byte little-endian number that specifies the relative locktime of the transaction input.`;
-        break;
-      case "txOutVarInt":
-        decoded = this.outs.length;
-        description = `This is a variable integer (VarInt) that denotes the number of subsequent transaction outputs.`;
-        break;
-      case /^txOut\[\d\]value$/.test(tuple[1]) && tuple[1]:
-        var match = tuple[1].match(/^txOut\[(\d+)\]value$/);
-        var index = parseInt(match[1]);
-        decoded = this.outs[index].value;
-        description = `This is an 8-byte little-endian number that represents the amount of bitcoin to be sent in satoshis.`;
-        break;
-      case /^txOut\[\d\]scriptVarInt$/.test(tuple[1]) && tuple[1]:
-        var match = tuple[1].match(/^txOut\[(\d+)\]scriptVarInt$/);
-        var index = parseInt(match[1]);
-        decoded = this.outs[index].script.length;
-        description = `This is a variable integer (VarInt) that denotes the length (in bytes) of the subsequent locking script.`;
-        break;
-      case /^txOut\[\d\]script$/.test(tuple[1]) && tuple[1]:
-        var match = tuple[1].match(/^txOut\[(\d+)\]script$/);
-        var index = parseInt(match[1]);
-        var script = this.outs[index].script;
-        console.log(script);
-        console.log(typeof script);
-        decoded = bitcoinjs.script.toASM(script);
-        try {
-        const address = bitcoinjs.address.fromOutputScript(script);
-        description = `This is the locking script (scriptPubKey), specifying the conditions under which the output can be spent. The scriptPubkey can be encoded as the following address: ${address}`;
-        } catch (error) {
-          description = `NO ADDRESS FOUND`;
-        }
-        break;
-      case /^witness\[\d\]VarInt$/.test(tuple[1]) && tuple[1]:
-        var match = tuple[1].match(/^witness\[(\d+)\]VarInt$/);
-        var index = parseInt(match[1]);
-        decoded = this.ins[index].witness.length;
-        description = `This is a variable integer (VarInt) that indicates the number of witness items for the transaction input.`;
-        break;
-      case /^witness\[\d\]\[\d\]scriptVarInt$/.test(tuple[1]) && tuple[1]:
-        var match = tuple[1].match(/^witness\[(\d+)\]\[(\d+)\]scriptVarInt$/);
-        var index = parseInt(match[1]);
-        var witnessIndex = parseInt(match[2]);
-        decoded = this.ins[index].witness[witnessIndex].length;
-        description = `This is a variable integer (VarInt) that denotes the length of the subsequent witness item.`;
-        break;
-      case /^witness\[\d\]\[\d\]script$/.test(tuple[1]) && tuple[1]:
-        var match = tuple[1].match(/^witness\[(\d+)\]\[(\d+)\]script$/);
-        var index = parseInt(match[1]);
-        var witnessIndex = parseInt(match[2]);
-
-        var script = this.ins[index].witness[witnessIndex];
-        var scriptHex = script.toString("hex");
-        if (scriptHex !== "") {
-          let scriptWithPushdata = bitcoinjs.script.fromASM(scriptHex);
-          decoded = bitcoinjs.script.toASM(scriptWithPushdata);
-          try {
-            const worksifscript = Buffer.from(decoded, "hex");
-            decoded = bitcoinjs.script.toASM(worksifscript);
-            description = `This is the redeem script for the transaction input.`;
-          } catch (error) {
-            description = `This is the witness item. For segwit transactions, the witness item is the unlocking script (scriptSig).`;
-          }
-        } else {
-          decoded = "";
-        }
-
-        break;
-      case "locktime":
-        decoded = this.locktime;
-        description = `This is a 4-byte little-endian number that specifies the absolute locktime of the transaction.`;
-        break;
-      default:
-        description = "No description available";
+    if (hex === "") {
+      decoded = "Empty script";
+    } else {
+      decoded = bitcoinjs.script.toASM(value);
     }
-
-    return [decoded, description];
+    const label = `txIn[${index}]script`;
+    return [[hex, label, decoded, txDescriptions.txInScript]];
   }
 
-  convertEndian(hexStr) {
-    // Validate input
-    if (hexStr.length % 2 !== 0) {
-      throw new Error("Invalid hexadecimal string, length must be even.");
-    }
-
-    // Reverse the byte order
-    let result = "";
-    for (let i = hexStr.length - 2; i >= 0; i -= 2) {
-      result += hexStr.substr(i, 2);
-    }
-
-    return result;
+  getInputSequence(index) {
+    const value = this.ins[index].sequence;
+    const hex = convert.toUInt32LE(value);
+    const label = `txIn[${index}]sequence`;
+    return [[hex, label, value, txDescriptions.txInSequence]];
   }
+
+  getOutputs() {
+    const outputTuples = this.outs.map((_, i) => [
+      ...this.getOutputValue(i),
+      ...this.getOutputScriptVarInt(i),
+      ...this.getOutputScript(i),
+    ]);
+
+    return [...this.getOutputCount(), ...outputTuples.flat()];
+  }
+
+  getOutputCount() {
+    const value = this.outs.length;
+    const hex = convert.toVarInt(value);
+    return [[hex, "txOutVarInt", value, txDescriptions.txOutVarInt]];
+  }
+
+  getOutputValue(index) {
+    const value = this.outs[index].value;
+    const hex = convert.toBigUInt64LE(value);
+    const label = `txOut[${index}]value`;
+    return [[hex, label, value, txDescriptions.txOutValue]];
+  }
+
+  getOutputScriptVarInt(index) {
+    const value = this.outs[index].script.length;
+    const hex = convert.toVarInt(value);
+    const label = `txOut[${index}]scriptVarInt`;
+    return [[hex, label, value, txDescriptions.txOutScriptVarInt]];
+  }
+
+  getOutputScript(index) {
+    const value = this.outs[index].script;
+    const hex = value.toString("hex");
+    const decoded = bitcoinjs.script.toASM(value);
+    const addressAndDescription = this.generateOutputScriptDescriptionWithAddress(index);
+    const label = `txOut[${index}]script`;
+    return [[hex, label, decoded, addressAndDescription]];
+  }
+
+  getWitnesses() {
+    const witnessTuples = this.ins.map((_, i) => [
+      ...this.getWitnessVarInt(i),
+      ...this.getWitnessStackElements(i),
+    ]);
+
+    return witnessTuples.flat();
+  }
+
+  getWitnessStackElements(index) {
+    const witness = this.ins[index].witness;
+    const witnessTuples = witness.map((_, i) => [
+      ...this.getWitnessItemsVarInt(index, i),
+      ...this.getWitnessItem(index, i),
+    ]);
+
+    return witnessTuples.flat();
+  }
+
+  getWitnessVarInt(index) {
+    const value = this.ins[index].witness.length;
+    const hex = convert.toVarInt(value);
+    const label = `witness[${index}]VarInt`;
+    return [[hex, label, value, txDescriptions.witnessVarInt]];
+  }
+
+  getWitnessItemsVarInt(index, witnessIndex) {
+    const value = this.ins[index].witness[witnessIndex].length;
+    const hex = convert.toVarInt(value);
+    const label = `witness[${index}][${witnessIndex}]scriptVarInt`;
+    return [[hex, label, value, txDescriptions.witnessItemsVarInt]];
+  }
+
+  getWitnessItem(index, witnessIndex) {
+    const value = this.ins[index].witness[witnessIndex];
+    const hex = value.toString("hex");
+    const decoded = this.decodeWitnessItemIfScript(index, witnessIndex);
+    const label = `witness[${index}][${witnessIndex}]script`;
+    return [[hex, label, decoded, txDescriptions.witnessItem]];
+  }
+
+  getLocktime() {
+    const value = this.locktime;
+    const hex = convert.toUInt32LE(value);
+    return [[hex, "locktime", value, txDescriptions.locktime]];
+  }
+
+  generateOutputScriptDescriptionWithAddress(index) {
+    let description;
+    try {
+      const script = this.outs[index].script;
+      const address = bitcoinjs.address.fromOutputScript(script);
+      description = `${txDescriptions.txOutScript} This scriptPubkey is a standard type and can be encoded as the following address: ${address}`;
+    } catch (error) {
+      description = `${txDescriptions.txOutScript} This scriptPubKey is non-standard and therefore cannot be encoded as an address.`;
+    }
+    return description;
+  }
+
+  decodeWitnessItemIfScript(index, witnessIndex) {
+    const witnessItem = this.ins[index].witness[witnessIndex];
+    let decoded = witnessItem.toString("hex");
+    if (decoded === "") {
+      return "Empty witness item";
+    }
+
+    // if the witness item is a script, decode it, otherwise return the original hex
+    try {
+      const buffer = Buffer.from(decoded, "hex");
+      decoded = bitcoinjs.script.toASM(buffer);
+    } catch (error) {
+      // not a script
+    }
+
+    return decoded;
+  }
+
 }
 
 export default MyTransaction;
