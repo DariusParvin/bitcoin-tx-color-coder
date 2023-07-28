@@ -153,7 +153,7 @@ document.addEventListener('click', function(event) {
       element.classList.toggle('highlight');
     });
 
-    if (!document.getElementById("showAll").checked) {
+    if (!document.getElementById("toggleSwitch").checked) {
       // hide all li elements in tx-breakdown
       document.querySelectorAll('#tx-breakdown li').forEach(li => {
         li.classList.add('hidden');
@@ -180,7 +180,7 @@ document.body.addEventListener("click", function (e) {
   }
 });
 
-document.getElementById('showAll').addEventListener('change', function(event) {
+document.getElementById('toggleSwitch').addEventListener('change', function(event) {
   if (event.target.checked) {
     // show all li elements in tx-breakdown
     document.querySelectorAll('#tx-breakdown li').forEach(li => {

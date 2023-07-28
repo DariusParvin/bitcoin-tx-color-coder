@@ -56,10 +56,17 @@
         <pre id="rawTxData"></pre>
       </div>
       <div id="coloredTextContainer" class="hidden">
-        <p>Color coded hex</p>
+        <h2>
+          Click on a color coded field to see a detailed breakdown of it
+        </h2>
         <pre id="coloredText"></pre>
-        <input type="checkbox" id="showAll" name="showAll">
-        <label for="showAll">Show me everything!</label>
+        <div class="detailed-view-container">
+          <label class="switch-label">Show all fields</label>
+          <div class="toggle-switch">
+            <input type="checkbox" id="toggleSwitch" name="toggleSwitch">
+            <label for="toggleSwitch" class="switch"></label>
+          </div>
+        </div>
         <ul id="tx-breakdown"></ul>
       </div>
     </main>
