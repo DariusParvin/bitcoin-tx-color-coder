@@ -125,6 +125,12 @@ function processTransaction(transactionHex) {
   
   txBreakdownElement.innerHTML = coloredListItems.join("");
   txBreakdownElement.classList.remove("hidden");
+  
+  // Initially, hide all li elements in tx-breakdown.
+  document.querySelectorAll('#tx-breakdown li').forEach(li => {
+    li.classList.add('hidden');
+  });
+
 }
 
 document.addEventListener('click', function(event) {
@@ -146,6 +152,18 @@ document.addEventListener('click', function(event) {
       // ...toggle the highlight class.
       element.classList.toggle('highlight');
     });
+
+    if (!document.getElementById("showAll").checked) {
+      // hide all li elements in tx-breakdown
+      document.querySelectorAll('#tx-breakdown li').forEach(li => {
+        li.classList.add('hidden');
+      });
+
+      // only show the li that contains the clicked span
+      document.querySelectorAll(`#tx-breakdown li span[data-section-id="${sectionId}"]`).forEach(span => {
+        span.parentNode.classList.remove('hidden');
+      });
+    }
   }
 });
 
@@ -158,6 +176,25 @@ document.body.addEventListener("click", function (e) {
     // Remove highlighting class from each highlighted element
     highlightedElements.forEach(function(el) {
       el.classList.remove('highlight');
+    });
+  }
+});
+
+document.getElementById('showAll').addEventListener('change', function(event) {
+  if (event.target.checked) {
+    // show all li elements in tx-breakdown
+    document.querySelectorAll('#tx-breakdown li').forEach(li => {
+      li.classList.remove('hidden');
+    });
+  } else {
+    // hide all li elements in tx-breakdown
+    document.querySelectorAll('#tx-breakdown li').forEach(li => {
+      li.classList.add('hidden');
+    });
+
+    // only show the li that contains a highlighted span
+    document.querySelectorAll('#tx-breakdown li span.highlight').forEach(span => {
+      span.parentNode.classList.remove('hidden');
     });
   }
 });
