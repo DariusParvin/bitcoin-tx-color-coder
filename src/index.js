@@ -8,11 +8,7 @@ window.onload = function () {
     .addEventListener("change", function (event) {
       // clear the previous transaction
       resetElements()
-
-      // hide all forms
-      document.getElementById("option1Form").classList.add("hidden");
-      document.getElementById("option2Form").classList.add("hidden");
-      document.getElementById("option3Form").classList.add("hidden");
+      hideForms()
 
       // show selected form
       document
@@ -25,11 +21,13 @@ window.onload = function () {
   exampleTransactions.forEach(function (transaction) {
     let button = document.createElement("button");
     button.classList.add("link-button");
-    button.textContent = transaction.type;
-    button.dataset.transactionType = transaction.type;
+    button.textContent = transaction.name;
+    button.dataset.transactionName = transaction.name;
     button.addEventListener("click", function (e) {
       e.preventDefault();
       processTransaction(transaction.value);
+      showTransactionDetails(transaction);
+
     });
     option1Form.appendChild(button);
   });
@@ -199,8 +197,24 @@ document.getElementById('toggleSwitch').addEventListener('change', function(even
   }
 });
 
+// Function to show transaction details
+function showTransactionDetails(transaction) {
+  let exampleTransactionDescription = document.getElementById("exampleTransactionDescription");
+  let transactionsContainer = document.getElementById("ExampleTransactionsContainer");
+
+  exampleTransactionDescription.innerHTML = "<br /><h3>Description</h3>" + transaction.name + ": " + transaction.description;
+  transactionsContainer.classList.remove("hidden");
+}
+
 function resetElements() {
+  document.getElementById("ExampleTransactionsContainer").classList.add("hidden");
   document.getElementById("txHexContainer").classList.add("hidden");
   document.getElementById("coloredTextContainer").classList.add("hidden");
   document.getElementById("tx-breakdown").classList.add("hidden");
+}
+
+function hideForms() {
+  option1Form.classList.add("hidden");
+  option2Form.classList.add("hidden");
+  option3Form.classList.add("hidden");
 }
