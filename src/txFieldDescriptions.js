@@ -15,6 +15,10 @@ export const TransactionDescriptions = {
     witnessVarInt: "This is a variable integer (VarInt) that indicates the number of witness items for the transaction input. Note that each segwit input has its own witnessVarInt. The order of the witness items is the same as the order of the transaction inputs.",
     witnessItemsVarInt: "This is a variable integer (VarInt) that denotes the length (in bytes) of the subsequent witness item.",
     witnessItem: "This is a witness item.",
+    witnessItemEmpty: "This witness item is empty.",
+    witnessItemPubkey: "This witness item is a public key.",
+    witnessItemSignature: "This witness item is a signature.",
+    witnessItemScript: "This witness item is a script.",
     locktime: "This is a 4-byte little-endian number that specifies the absolute locktime of the transaction."
   };
   

@@ -189,9 +189,9 @@ class MyTransaction extends bitcoinjs.Transaction {
   getWitnessItem(index, witnessIndex) {
     const witnessItem = this.ins[index].witness[witnessIndex];
     const hex = witnessItem.toString("hex");
-    const decoded = this.decodeWitnessItemIfScript(witnessItem);
+    const w = this.identifyWitnessItem(witnessItem);
     const label = `witness[${index}][${witnessIndex}]script`;
-    return [[hex, label, decoded, txDescriptions.witnessItem]];
+    return [[hex, label, w.decoded, w.description]];
   }
 
   getLocktime() {
@@ -212,21 +212,32 @@ class MyTransaction extends bitcoinjs.Transaction {
     return description;
   }
 
-  decodeWitnessItemIfScript(witnessItem) {
-    let decoded = witnessItem.toString("hex");
-    if (decoded === "") {
-      return "Empty witness item";
+  // identifyWitnessItem takes a witness item and returns a description of the item and a decoded value
+  identifyWitnessItem(witnessItem) {
+    let hex = witnessItem.toString("hex");
+    if (hex === "") {
+      return {description: txDescriptions.witnessItemEmpty, decoded: ""};
     }
 
-    // if the witness item is a script, decode it, otherwise return the original hex
+    if (bitcoinjs.script.isCanonicalPubKey(witnessItem)) {
+      return {description: txDescriptions.witnessItemPubkey, decoded: hex};
+    }
+
+    if (bitcoinjs.script.isCanonicalScriptSignature(witnessItem)) {
+      return {description: txDescriptions.witnessItemSignature, decoded: hex};
+    }
+
+    // if the witness item is a script, decode it 
     try {
-      const buffer = Buffer.from(decoded, "hex");
-      decoded = bitcoinjs.script.toASM(buffer);
+      const decodedScript = bitcoinjs.script.toASM(witnessItem);
+      return {description: txDescriptions.witnessItemScript, decoded: decodedScript};
     } catch (error) {
       // not a script
     }
 
-    return decoded;
+    // TODO: identify taproot witness items
+
+    return {description: txDescriptions.witnessItem, decoded: hex};
   }
 
 }
