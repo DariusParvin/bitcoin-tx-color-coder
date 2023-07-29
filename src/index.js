@@ -202,7 +202,7 @@ function showTransactionDetails(transaction) {
   let exampleTransactionDescription = document.getElementById("exampleTransactionDescription");
   let transactionsContainer = document.getElementById("ExampleTransactionsContainer");
 
-  exampleTransactionDescription.innerHTML = "<br /><h3>Description</h3>" + transaction.name + ": " + transaction.description;
+  exampleTransactionDescription.innerHTML = `<br /><u>${transaction.name}</u> : ${transaction.description}`;
   transactionsContainer.classList.remove("hidden");
 }
 
@@ -211,6 +211,7 @@ function resetElements() {
   document.getElementById("txHexContainer").classList.add("hidden");
   document.getElementById("coloredTextContainer").classList.add("hidden");
   document.getElementById("tx-breakdown").classList.add("hidden");
+  document.getElementById("toggleSwitch").checked = false;
 }
 
 function hideForms() {
