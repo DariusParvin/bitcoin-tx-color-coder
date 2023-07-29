@@ -132,8 +132,9 @@ class MyTransaction extends bitcoinjs.Transaction {
   getOutputValue(index) {
     const value = this.outs[index].value;
     const hex = convert.toBigUInt64LE(value);
+    const satsValue = `${value} sats`;
     const label = `txOut[${index}]value`;
-    return [[hex, label, value, txDescriptions.txOutValue]];
+    return [[hex, label, satsValue, txDescriptions.txOutValue]];
   }
 
   getOutputScriptVarInt(index) {
@@ -186,9 +187,9 @@ class MyTransaction extends bitcoinjs.Transaction {
   }
 
   getWitnessItem(index, witnessIndex) {
-    const value = this.ins[index].witness[witnessIndex];
-    const hex = value.toString("hex");
-    const decoded = this.decodeWitnessItemIfScript(index, witnessIndex);
+    const witnessItem = this.ins[index].witness[witnessIndex];
+    const hex = witnessItem.toString("hex");
+    const decoded = this.decodeWitnessItemIfScript(witnessItem);
     const label = `witness[${index}][${witnessIndex}]script`;
     return [[hex, label, decoded, txDescriptions.witnessItem]];
   }
@@ -211,8 +212,7 @@ class MyTransaction extends bitcoinjs.Transaction {
     return description;
   }
 
-  decodeWitnessItemIfScript(index, witnessIndex) {
-    const witnessItem = this.ins[index].witness[witnessIndex];
+  decodeWitnessItemIfScript(witnessItem) {
     let decoded = witnessItem.toString("hex");
     if (decoded === "") {
       return "Empty witness item";
