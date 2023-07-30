@@ -86,6 +86,7 @@ async function fetchData(txInput) {
 
 
 function processTransaction(transactionHex) {
+  resetElements()
   const rawTx = document.getElementById("rawTxData");
   rawTx.textContent = transactionHex;
   document.getElementById("txHexContainer").classList.remove("hidden");
