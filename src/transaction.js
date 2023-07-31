@@ -1,6 +1,10 @@
 const bitcoinjs = require("bitcoinjs-lib");
+const ecc = require('@bitcoinerlab/secp256k1');
 import { TransactionDescriptions as txDescriptions } from "./txFieldDescriptions.js";
 import * as convert from './conversionHelpers.js';
+
+// Needed for p2tr support
+bitcoinjs.initEccLib(ecc);
 
 class MyTransaction extends bitcoinjs.Transaction {
   constructor() {
