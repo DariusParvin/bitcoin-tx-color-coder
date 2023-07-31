@@ -86,7 +86,6 @@ async function fetchData(txInput) {
 
 
 function processTransaction(transactionHex) {
-  resetElements()
   const rawTx = document.getElementById("rawTxData");
   rawTx.textContent = transactionHex;
   document.getElementById("txHexContainer").classList.remove("hidden");
@@ -123,12 +122,24 @@ function processTransaction(transactionHex) {
   });
   
   txBreakdownElement.innerHTML = coloredListItems.join("");
-  txBreakdownElement.classList.remove("hidden");
+  // txBreakdownElement.classList.remove("hidden");
   
-  // Initially, hide all li elements in tx-breakdown.
-  document.querySelectorAll('#tx-breakdown li').forEach(li => {
-    li.classList.add('hidden');
-  });
+  // if the toggle switch is checked, show all li elements
+  if (document.getElementById("toggleSwitch").checked) {
+    document.querySelectorAll('#tx-breakdown li').forEach(li => {
+      li.classList.remove('hidden');
+    });
+  } else {
+    // hide all li elements in tx-breakdown
+    document.querySelectorAll('#tx-breakdown li').forEach(li => {
+      li.classList.add('hidden');
+    });
+
+    // only show the li that contains a highlighted span
+    document.querySelectorAll('#tx-breakdown li span.highlight').forEach(span => {
+      span.parentNode.classList.remove('hidden');
+    });
+  }
 
 }
 
@@ -211,8 +222,6 @@ function resetElements() {
   document.getElementById("ExampleTransactionsContainer").classList.add("hidden");
   document.getElementById("txHexContainer").classList.add("hidden");
   document.getElementById("coloredTextContainer").classList.add("hidden");
-  document.getElementById("tx-breakdown").classList.add("hidden");
-  document.getElementById("toggleSwitch").checked = false;
 }
 
 function hideForms() {
