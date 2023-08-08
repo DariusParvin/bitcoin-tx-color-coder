@@ -2,6 +2,8 @@ import MyTransaction from "./transaction.js";
 import { getColor } from "./colorText.js";
 import { exampleTransactions } from "./exampleTransactions.js";
 
+let pinnedSectionId = null;
+
 window.onload = function () {
   document
     .getElementById("optionsForm")
@@ -86,29 +88,45 @@ async function fetchData(txInput) {
 
 
 function processTransaction(transactionHex) {
+  let tx = MyTransaction.fromHex(transactionHex);
+  
+  // get transaction details
+  const txid = tx.getId();
+  const size = tx.byteLength();
+  const weight = tx.weight();
+  const vsize = tx.virtualSize();
+
+  // display transaction details
   const rawTx = document.getElementById("rawTxData");
-  rawTx.textContent = transactionHex;
+  const transactionInfo = `<strong>Transaction ID:</strong> ${txid}
+<strong>Transaction Hex:</strong> ${transactionHex}
+<strong>Size:</strong> ${size} bytes
+<strong>Weight:</strong> ${weight} units
+<strong>vSize:</strong> ${vsize} vbytes`;
+  rawTx.innerHTML = transactionInfo;
   document.getElementById("txHexContainer").classList.remove("hidden");
 
-  let tx = MyTransaction.fromHex(transactionHex);
+  // get color coded transaction text
   let annotatedData = tx.toAnnotatedData();
+
+  // create a list of spans for the color coded bytes
   var coloredSpans = annotatedData.map(function (item, index) {
     var color = getColor(item);
     return '<span style="color: ' + color + '" data-section-id="' + index + '" class="transaction-section">' + item[0] + "</span>" + "|";
   });
 
+  // display the colored text
   var coloredTextElement = document.getElementById("coloredText");
   coloredTextElement.innerHTML = coloredSpans.join("");
   document.getElementById("coloredTextContainer").classList.remove("hidden");
 
-  var txBreakdownElement = document.getElementById("tx-breakdown");
+  // create a list of transaction section details
   var coloredListItems = annotatedData.map(function (item, index) {
     var color = getColor(item);
     var data = item[0];
     var label = item[1];
     var decoded = item[2];
     var description = item[3];
-  
     return (
       '<li><span style="color: ' + color + '" class="transaction-section legend-item styledTextPart" data-section-id="' + index + '">' +
       data +
@@ -118,13 +136,12 @@ function processTransaction(transactionHex) {
       '<strong>Decoded Value: </strong> ' + decoded + '<br>' +
       '<strong>Description: </strong>' + description + 
       '</div></li>'
-    );
-  });
-  
-  txBreakdownElement.innerHTML = coloredListItems.join("");
-  // txBreakdownElement.classList.remove("hidden");
-  
-  // if the toggle switch is checked, show all li elements
+      );
+    });
+
+    var txBreakdownElement = document.getElementById("tx-breakdown");
+    txBreakdownElement.innerHTML = coloredListItems.join("");
+    // if the toggle switch is checked, show all li elements
   if (document.getElementById("toggleSwitch").checked) {
     document.querySelectorAll('#tx-breakdown li').forEach(li => {
       li.classList.remove('hidden');
@@ -144,36 +161,41 @@ function processTransaction(transactionHex) {
 }
 
 document.addEventListener('mouseover', function(event) {
-  // If a transaction section was clicked...
+  if (pinnedSectionId !== null) {
+    return; // If there's a pinned section, ignore mouseover.
+  }
+
+  // If a transaction section was hovered over...
   if (event.target.matches('.transaction-section')) {
-     // Un-highlight all elements.
-     document.querySelectorAll('.highlight').forEach(element => {
-      element.classList.remove('highlight');
-    });
-    
-    // Get the section id.
     let sectionId = event.target.dataset.sectionId;
+    handleHighlight(sectionId);
+  }
+});
 
-    // Find all elements with this section id.
-    let elements = document.querySelectorAll(`[data-section-id="${sectionId}"]`);
+document.addEventListener('click', function(event) {
+  // handle code highlighting
+  if (event.target.matches('.transaction-section')) {
+    let sectionId = event.target.dataset.sectionId;
+    handleHighlight(sectionId);
+  }
 
-    // For each element...
-    elements.forEach(element => {
-      // ...toggle the highlight class.
-      element.classList.toggle('highlight');
-    });
+  // handle pinning
 
-    if (!document.getElementById("toggleSwitch").checked) {
-      // hide all li elements in tx-breakdown
-      document.querySelectorAll('#tx-breakdown li').forEach(li => {
-        li.classList.add('hidden');
-      });
+  // Un-pin all elements.
+  document.querySelectorAll('.pinned').forEach(element => {
+    element.classList.remove('pinned');
+  });
 
-      // only show the li that contains the clicked span
-      document.querySelectorAll(`#tx-breakdown li span[data-section-id="${sectionId}"]`).forEach(span => {
-        span.parentNode.classList.remove('hidden');
-      });
+  // Pin the clicked element.
+  if (event.target.matches('.transaction-section')) {
+    if (pinnedSectionId === event.target.dataset.sectionId) {
+      pinnedSectionId = null;
+    } else {
+      event.target.classList.add('pinned');
+      pinnedSectionId = event.target.dataset.sectionId;
     }
+  } else {
+    pinnedSectionId = null; // If clicked outside, unpin.
   }
 });
 
@@ -196,7 +218,35 @@ document.getElementById('toggleSwitch').addEventListener('change', function(even
   }
 });
 
-// Function to show transaction details
+function handleHighlight(sectionId) {
+  // Un-highlight all elements.
+  document.querySelectorAll('.highlight').forEach(element => {
+    element.classList.remove('highlight');
+  });
+
+  // Find all elements with the given section id.
+  let elements = document.querySelectorAll(`[data-section-id="${sectionId}"]`);
+
+  // For each element...
+  elements.forEach(element => {
+    // ...toggle the highlight class.
+    element.classList.add('highlight'); // Changing from toggle to add to ensure the class is added
+  });
+
+  // If the toggle switch is off
+  if (!document.getElementById("toggleSwitch").checked) {
+    // hide all li elements in tx-breakdown
+    document.querySelectorAll('#tx-breakdown li').forEach(li => {
+      li.classList.add('hidden');
+    });
+
+    // only show the li that contains the highlighted span
+    document.querySelectorAll(`#tx-breakdown li span[data-section-id="${sectionId}"]`).forEach(span => {
+      span.parentNode.classList.remove('hidden');
+    });
+  }
+}
+
 function showTransactionDetails(transaction) {
   let exampleTransactionDescription = document.getElementById("exampleTransactionDescription");
   let transactionsContainer = document.getElementById("ExampleTransactionsContainer");

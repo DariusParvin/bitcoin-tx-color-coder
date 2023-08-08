@@ -98,7 +98,11 @@ h2 {
 }
 
 .highlight {
-  background-color: gray;
+  background-color: rgb(80, 80, 80);
+}
+
+.pinned {
+    background-color: rgb(130, 130, 130);
 }
 
 .styledTextPart {
@@ -108,6 +112,7 @@ h2 {
 }
 
 #tx-breakdown {
+  min-height: 150px;
   white-space: pre-wrap;
   word-wrap: break-word;
 }
