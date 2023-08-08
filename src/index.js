@@ -143,7 +143,7 @@ function processTransaction(transactionHex) {
 
 }
 
-document.addEventListener('click', function(event) {
+document.addEventListener('mouseover', function(event) {
   // If a transaction section was clicked...
   if (event.target.matches('.transaction-section')) {
      // Un-highlight all elements.
@@ -174,19 +174,6 @@ document.addEventListener('click', function(event) {
         span.parentNode.classList.remove('hidden');
       });
     }
-  }
-});
-
-document.body.addEventListener("click", function (e) {
-  // If the clicked target is not part of your color coded text or legend list
-  if (!e.target.matches('.highlight')) {
-    // Get all currently highlighted elements
-    let highlightedElements = document.querySelectorAll('.highlight');
-
-    // Remove highlighting class from each highlighted element
-    highlightedElements.forEach(function(el) {
-      el.classList.remove('highlight');
-    });
   }
 });
 
