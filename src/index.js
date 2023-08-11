@@ -2,6 +2,10 @@ import MyTransaction from "./transaction.js";
 import { getColor } from "./colorText.js";
 import { exampleTransactions } from "./exampleTransactions.js";
 
+import React from 'react';
+import ReactDOM from 'react-dom';
+import TxDetails from './components/TxDetails';
+
 let pinnedSectionId = null;
 
 window.onload = function () {
@@ -28,7 +32,7 @@ window.onload = function () {
     button.addEventListener("click", function (e) {
       e.preventDefault();
       processTransaction(transaction.value);
-      showTransactionDetails(transaction);
+      showExampleTxDescription(transaction);
 
     });
     option1Form.appendChild(button);
@@ -85,8 +89,6 @@ async function fetchData(txInput) {
   throw new Error('Transaction not found in both mainnet and testnet.');
 }
 
-
-
 function processTransaction(transactionHex) {
   let tx = MyTransaction.fromHex(transactionHex);
   
@@ -96,15 +98,9 @@ function processTransaction(transactionHex) {
   const weight = tx.weight();
   const vsize = tx.virtualSize();
 
-  // display transaction details
-  const rawTx = document.getElementById("rawTxData");
-  const transactionInfo = `<strong>Transaction ID:</strong> ${txid}
-<strong>Transaction Hex:</strong> ${transactionHex}
-<strong>Size:</strong> ${size} bytes
-<strong>Weight:</strong> ${weight} units
-<strong>vSize:</strong> ${vsize} vbytes`;
-  rawTx.innerHTML = transactionInfo;
-  document.getElementById("txHexContainer").classList.remove("hidden");
+  // render transaction details
+  ReactDOM.render(<TxDetails txid={txid} txHex={transactionHex} size={size} weight={weight} vsize={vsize} />, document.getElementById('react-txDetails'));
+  document.getElementById("react-txDetails").classList.remove("hidden");
 
   // get color coded transaction text
   let annotatedData = tx.toAnnotatedData();
@@ -247,17 +243,17 @@ function handleHighlight(sectionId) {
   }
 }
 
-function showTransactionDetails(transaction) {
+function showExampleTxDescription(transaction) {
   let exampleTransactionDescription = document.getElementById("exampleTransactionDescription");
   let transactionsContainer = document.getElementById("ExampleTransactionsContainer");
 
-  exampleTransactionDescription.innerHTML = `<br /><u>${transaction.name}</u> : ${transaction.description}`;
+  exampleTransactionDescription.innerHTML = `<br><u>${transaction.name}</u> : ${transaction.description}<br><br>`;
   transactionsContainer.classList.remove("hidden");
 }
 
 function resetElements() {
   document.getElementById("ExampleTransactionsContainer").classList.add("hidden");
-  document.getElementById("txHexContainer").classList.add("hidden");
+  document.getElementById("react-txDetails").classList.add("hidden");
   document.getElementById("coloredTextContainer").classList.add("hidden");
 }
 

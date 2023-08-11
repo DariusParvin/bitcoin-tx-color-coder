@@ -16,9 +16,15 @@
     "webpack-dev-server": "^4.15.1"
   },
   "dependencies": {
+    "@babel/core": "^7.22.10",
+    "@babel/preset-env": "^7.22.10",
+    "@babel/preset-react": "^7.22.5",
     "@bitcoinerlab/secp256k1": "^1.0.5",
+    "babel-loader": "^9.1.3",
     "bitcoinjs-lib": "^6.1.3",
     "buffer": "^6.0.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "varuint-bitcoin": "^1.1.2"
   }
 }
