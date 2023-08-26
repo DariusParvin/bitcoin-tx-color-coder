@@ -52,8 +52,12 @@ window.onload = function () {
         return;
       }
       
-      const transactionHex = await fetchData(txidInput);
-      processTransaction(transactionHex);
+      try {
+        const transactionHex = await fetchData(txidInput);
+        processTransaction(transactionHex);
+      } catch (error) {
+        alert(error.message);
+      }
     });
 
   document
